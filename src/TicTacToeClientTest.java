@@ -12,5 +12,4 @@ public class TicTacToeClientTest {
 		}
 		application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-
 }

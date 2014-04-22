@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 
-public class TicTacToeClient extends JFrame implements Runnable{
+public class TicTacToeClient extends JFrame implements Runnable {
 	private JTextField idField;
 	private JLabel idLabel;
 	private JTextArea displayArea;
@@ -44,7 +44,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 	private final String O_MARK = "0";
 	private Lock userInputLock;
 	
-	public TicTacToeClient(String host){
+	public TicTacToeClient(String host) {
 		ticTacToeHost = host;
 		displayArea = new JTextArea(4, 20);
 		displayArea.setEditable(false);
@@ -55,7 +55,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 		board = new Square[3][3];
 		
 		for (int row = 0; row < board.length; row++) {
-			for(int column = 0; column < board[row].length; column++){
+			for(int column = 0; column < board[row].length; column++) {
 				board[row][column] = new Square(" ", row * 3 + column);
 				boardPanel.add(board[row][column]);
 			}
@@ -83,20 +83,20 @@ public class TicTacToeClient extends JFrame implements Runnable{
 		startClient();
 	}
 	
-	public void startClient(){
+	public void startClient() {
 		try{
 			connection = new Socket(InetAddress.getByName(ticTacToeHost), 12345);
 			
 			input = new Scanner(connection.getInputStream());
 			output = new Formatter(connection.getOutputStream());
-		}catch(IOException ioException){
+		}catch(IOException ioException) {
 			ioException.printStackTrace();
 		}
 		ExecutorService worker = Executors.newFixedThreadPool(1);
 		worker.execute(this);
 	}
 	
-	public void run(){
+	public void run() {
 		String response;
 		String userName;
 		String gameName;
@@ -108,7 +108,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
                 JOptionPane.PLAIN_MESSAGE,
                 null,
                 null,
-                "");
+                null);
 		
 		gameName = (String)JOptionPane.showInputDialog(
                 null,
@@ -130,8 +130,8 @@ public class TicTacToeClient extends JFrame implements Runnable{
 			myMark = input.nextLine();
 			
 			SwingUtilities.invokeLater(
-				new Runnable(){
-					public void run(){
+				new Runnable() {
+					public void run() {
 						idField.setText("You are player \"" + myMark + "\"");
 					}
 				}
@@ -153,19 +153,30 @@ public class TicTacToeClient extends JFrame implements Runnable{
 			displayMessage("Valid move, please wait.\n");
 			setMark(currentSquare, myMark);
 		} else if (message.equals("Invalid move, try again")) {
-			displayMessage(message+"\n");
+			displayMessage(message + "\n");
 			myTurn = true;
 		} else if (message.equals("Opponent moved")) {
 			int location = input.nextInt();
 			input.nextLine();
-			int row = location /3;
+			int row = location / 3;
 			int column = location % 3;
 			
-			setMark(board[row][column],(myMark.equals(X_MARK)?O_MARK:X_MARK));
-			displayMessage("Opponent moved. Your turn. \n");
-			myTurn = true;
-		} else if (message.equals("You won!.")) {
-			displayMessage("YOU WON THE GAME!");
+			setMark(board[row][column], (myMark.equals(X_MARK) ? O_MARK : X_MARK));
+			
+			boolean gameOver = input.nextBoolean();  
+			
+			if (!gameOver) {
+				displayMessage("Opponent moved. Your turn. \n");
+				myTurn = true;
+			} else {
+				displayMessage("You lose.\n");
+			}
+		} else if (message.equals("You won!")) {
+			displayMessage("YOU WON!");
+		} else if (message.equals("You lose!")) {
+			displayMessage("YOU LOSE!");
+		} else if (message.equals("Game Over!")) {
+			displayMessage("Game Over!");
 		} else {
 			displayMessage(message + "\n");
 		}
@@ -184,7 +195,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 	private void setMark(final Square squareToMark, final String mark) {
 		SwingUtilities.invokeLater(
 			new Runnable(){
-				public void run(){
+				public void run() {
 					squareToMark.setMark(mark);
 				}
 			}
@@ -192,7 +203,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 	}
 	
 	public void sendClickedSquare(int location) {
-		if(myTurn){
+		if (myTurn){
 			output.format("%d\n", location);
 			output.flush();
 			myTurn = false;
@@ -212,7 +223,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 			location = squareLocation;
 			
 			addMouseListener(
-				new MouseAdapter(){
+				new MouseAdapter() {
 					public void mouseReleased(MouseEvent e) {
 						setCurrentSquare(Square.this);
 						sendClickedSquare(getSquareLocation());
@@ -222,7 +233,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 		}
 		
 		public Dimension getPreferredSize() {
-			return new Dimension(30,30);
+			return new Dimension(30, 30);
 		}
 		
 		public Dimension getMinimumSize() {
@@ -241,7 +252,7 @@ public class TicTacToeClient extends JFrame implements Runnable{
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			
-			g.drawRect(0, 0, 29,29);
+			g.drawRect(0, 0, 29, 29);
 			g.drawString(mark, 11, 20);
 		}
 	}
